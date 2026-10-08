@@ -3,7 +3,9 @@ import sys
 
 class Instruction:
 
-    def __init__(self) -> None:
+    def __init__(self, name : str, operands : list) -> None:
+        self.name = name
+        self.args = []
         pass
 
 class CPU:
@@ -16,8 +18,12 @@ def main() -> None:
     args = sys.argv[1:]
     target_file = "test.txt"
 
-    
-    pass
+    file_as_str = None
+    with open(target_file) as file:
+        file_as_str = file.read()
+
+    program = parse_program(file_as_str)
+    execute_program(program)
 
 def parse_program(program : str) -> list[Instruction]:
     pass
