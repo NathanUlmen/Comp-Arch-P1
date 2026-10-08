@@ -1,10 +1,9 @@
-import os
 import sys
 
 class Instruction:
 
-    def __init__(self, name : str, operands : list) -> None:
-        self.name = name
+    def __init__(self, opcode : str, operands : list) -> None:
+        self.name = opcode
         self.args = []
         pass
 
@@ -26,7 +25,9 @@ def main() -> None:
     execute_program(program)
 
 def parse_program(program : str) -> list[Instruction]:
-    pass
+    # TODO 
+    return []
+
 
 def execute_program(program : list[Instruction]) -> None:
     cpu = CPU()
@@ -36,4 +37,7 @@ def execute_program(program : list[Instruction]) -> None:
 
 def tick(program : list[Instruction], cpu : CPU):
     pass
+
+if __name__ == "__main__":
+    main()
 
