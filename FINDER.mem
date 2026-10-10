@@ -1,0 +1,14 @@
+//Finder program
+8,24
+0x00 , 1
+0x01 , 2
+0x02 , 3 
+0x03 , 12
+0x04 , 0xFFF
+
+0x80 , 5           // Entry 0
+0x81 , 45          // Entry 1
+0x82 , 15          // Entry 2
+0x83 , 3           // Entry 3
+0x84 , 0xFFF       // End of List
+0x85 , 0x080       // Beginning entry location

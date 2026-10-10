@@ -14,7 +14,7 @@ class Instruction:
 
 class CPU:
 
-    def __init__(self) -> None:
+    def __init__(self, memory) -> None:
         self.should_halt = False
         self.program_counter = 0
         self.registers : dict[str, int] = {f"R{i}" : 0 for i in range(16)}
@@ -26,6 +26,7 @@ class CPU:
             "overflow" : False,
             "saturation" : False
         }
+        self.memory = memory[2]
 
     def __str__(self) -> str:
         output = [
@@ -61,34 +62,59 @@ def main() -> None:
     args = sys.argv[1:]
     run_mode = args[0] # TODO: implement different run modes, does nothing currently
     program_file = args[1]
-    memory_file = "test.mem" # TODO: udpate to "args[2]" once we have memory figured out
+    memory_file = args[2]
 
-    file_as_str = None
+    program_as_str = None
     with open(program_file) as file:
-        file_as_str = file.read()
+        program_as_str = file.read()
 
-    program = parse_program(file_as_str)
+    mem_as_str = None
+    with open(memory_file) as file:
+        mem_as_str = file.read()
+
+    program = parse_program(program_as_str)
+    memory = init_memory(mem_as_str)
     for i in program:
         print(i)
-    execute_program(program)
+    execute_program(program, memory)
 
 def parse_program(program : str) -> list[Instruction]:
     program_instrs = []
     for line in program.splitlines():
-        split_line = line.split("//", 1)[0].split() # strip out comments and then split on whitespace
-        if len(split_line) > 0:
-            instr = Instruction(split_line[0].upper(), split_line[1:])
-            program_instrs.append(instr)
+        line = line.split("//", 1)[0].split() # strip out comments and then split on whitespace
+        if not line :
+            continue
+        instr = Instruction(line[0].upper(), line[1:])
+        program_instrs.append(instr)
     
     return program_instrs
 
+# returns a tuple of (name, specs, mem_contens)
+def init_memory(mem_file : str) -> tuple[str, list[str], list[int]]:
+    split_file = mem_file.splitlines()
+    name = split_file[0].strip("//")
+    specs = split_file[1].split(",")
+    max_address = (1 << int(specs[0]))
+    mem_contents = [0 for i in range(max_address)]
+    for line in split_file[2:]:
+        line = line.split("//", 1)[0].strip()
+        if not line:
+            continue
+        address, value = line.split(",")
+        mem_contents[parse_int(address)] = parse_int(value)
 
-def execute_program(program : list[Instruction]) -> CPU:
-    cpu = CPU()
+    return (name, specs, mem_contents)
+
+
+def execute_program(program : list[Instruction], memory) -> CPU:
+    cpu = CPU(memory)
     # All instructions MUST return a bool that indicates whether or not
     # the program counter is incremented. Branch instrs will opt out if condition is met
     opcode_lookup = {
         "LDR" : ldr,
+        "LDI" : ldi,
+        "STR" : str_,
+        "STI" : sti,
         "HALT" : halt,
         "ADD" : add,
         "SUB" : sub,
@@ -190,22 +216,22 @@ def teq(cpu : CPU, operands : list[str]) -> bool:
 
 # Memory
 def ldr(cpu : CPU, operands : list[str]) -> bool:
-    # TODO: this currently functions like ldri
-    # Once memory if figured out needs to be udpated to pull value at address instead
-    cpu.write_register(operands[1], int(operands[0], 16))
+    value_from_mem = cpu.memory[parse_int(operands[0])]
+    cpu.write_register(operands[1], value_from_mem)
     return True
 
 def ldi(cpu : CPU, operands : list[str]) -> bool:
-    pass
-
-def store(cpu: CPU, operands : list[str]) -> bool:
-    pass
+    value_from_mem = cpu.memory[cpu.memory[parse_int(operands[0])]]
+    cpu.write_register(operands[1], value_from_mem)
+    return True
 
 def str_(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    cpu.memory[parse_int(operands[0])] = cpu.registers[operands[1]]
+    return True
 
 def sti(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    cpu.memory[cpu.memory[parse_int(operands[0])]] = cpu.registers[operands[1]]
+    return True
 
 # Floating point
 def fadd(cpu : CPU, operands : list[str]) -> bool:
@@ -274,6 +300,10 @@ def nop(cpu : CPU, operands : list[str]) -> bool:
 def halt(cpu : CPU, operands : list[str]) -> bool:
     cpu.should_halt = True
     return False
+
+# Helpers
+def parse_int(num : str) -> int:
+    return int(num.strip(), 0)
 
 if __name__ == "__main__":
     main()

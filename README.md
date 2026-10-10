@@ -5,17 +5,21 @@ Brad Ames, Evan Huizinga, Zion Andrade, Nathan Ulmen, Isaac Hager
 ## Running
 
 ```sh
-python3 main.py -<r|s> <program_file> 
+python3 main.py -<r|s> <program_file>  <memory_file>
 ```
 
 EX:
 ```sh
-python3 main.py -r test.txt
+python3 main.py -r MINFINDER.txt FINDER.mem
 ```
 
 ## Progress
 
-### TODO: figure out schema for memory files
+## TODO
+Implement remaining instructions and look into the specs that the memory file defines. Right now 
+we dont act differently if bits stored at each address are different.
+* Step by step execution of program
+
 
 ### ALU - 14
 
@@ -36,10 +40,11 @@ python3 main.py -r test.txt
 
 ### MEM - 4
 
-* LDR - **DONE(will need updated once we decide on memory)**
-* STR
-* LDI
-* STI
+* LDR - **DONE**
+* STR - **DONE**
+* LDI - **DONE**
+* STI - **DONE**
+
 
 ### FP - 5
 
