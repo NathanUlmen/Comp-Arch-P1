@@ -16,45 +16,45 @@ python3 main.py -r test.txt
 ## Progress 
 
 ### ALU - 14
-ADD - **DONE**
-SUB - **DONE**
-MUL - **DONE**
-SDIV 
-UDIV 
-AND
-OR
-XOR
-BIC
-NOT
-MOV
-LSL
-LSR
-TEQ
+* ADD - **DONE**
+* SUB - **DONE**
+* MUL - **DONE**
+* SDIV 
+* UDIV 
+* AND
+* OR
+* XOR
+* BIC
+* NOT
+* MOV
+* LSL
+* LSR
+* TEQ
 
 ### MEM - 4
-LDR - **DONE(will need updated once we decide on memory)**
-STORE
-PUSH
-POP
+* LDR - **DONE(will need updated once we decide on memory)**
+* STORE
+* PUSH
+* POP
 
 ### FP - 5
-FADD
-FSUB
-FMUL
-FDIV
-FCMP
-
-### CONTROL - 7
-B
-BEQ
-BNE
-BGT
-BLT
-BGE 
-BLE
+* FADD
+* FSUB
+* FMUL
+* FDIV
+* FCMP
+ 
+ ### CONTROL - 7
+* B
+* BEQ
+* BNE
+* BGT
+* BLT
+* BGE 
+* BLE
 
 ### OTHER - 2
-NOP 
-HALT
+* NOP 
+* HALT
 
 
