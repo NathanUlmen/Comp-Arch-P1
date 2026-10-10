@@ -53,8 +53,9 @@ class CPU:
 
 def main() -> None:
     args = sys.argv[1:]
-    program_file = "test.txt"
-    memory_file = "test.mem"
+    run_mode = args[0] # TODO: implement different run modes, does nothing currently
+    program_file = args[1]
+    memory_file = "test.mem" # TODO: udpate once we have memory figured out
 
     file_as_str = None
     with open(program_file) as file:
@@ -79,14 +80,11 @@ def parse_program(program : str) -> list[Instruction]:
 def execute_program(program : list[Instruction]) -> CPU:
     cpu = CPU()
     while not cpu.should_halt:
-        tick(program, cpu)
+        instr = program[cpu.program_counter]
+        execute_instr(cpu, instr)
+
     print(cpu)
     return cpu
-
-
-def tick(program : list[Instruction], cpu : CPU) -> None:
-    instr = program[cpu.program_counter]
-    execute_instr(cpu, instr)
 
 def execute_instr(cpu : CPU, instr: Instruction) -> None:
     lookup = {
@@ -127,6 +125,9 @@ def div(cpu : CPU, operands : list[str]) -> None:
     result = cpu.registers[operands[1]] // cpu.registers[operands[2]]
     cpu.write_register(operands[0], result)
     cpu.program_counter += 1
+
+
+
 
 if __name__ == "__main__":
     main()
