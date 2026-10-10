@@ -76,30 +76,57 @@ def parse_program(program : str) -> list[Instruction]:
     return program_instrs
 
 
-def execute_program(program : list[Instruction]) -> None:
+def execute_program(program : list[Instruction]) -> CPU:
     cpu = CPU()
     while not cpu.should_halt:
         tick(program, cpu)
     print(cpu)
+    return cpu
 
 
-def tick(program : list[Instruction], cpu : CPU):
+def tick(program : list[Instruction], cpu : CPU) -> None:
     instr = program[cpu.program_counter]
     execute_instr(cpu, instr)
 
-def execute_instr(cpu : CPU, instr: Instruction):
+def execute_instr(cpu : CPU, instr: Instruction) -> None:
     lookup = {
         "LDR" : ldr,
-        "HALT" : halt
+        "HALT" : halt,
+        "ADD" : add,
+        "SUB" : sub,
+        "MUL" : mul,
+        "DIV" : div 
     }
     lookup[instr.opcode](cpu, instr.operands)
 
-def ldr(cpu : CPU, operands : list[str]):
+def ldr(cpu : CPU, operands : list[str]) -> None:
+    # TODO: this currently functions like ldri
+    # Once memory if figured out needs to be udpated to pull value at address instead
     cpu.write_register(operands[1], int(operands[0], 16))
     cpu.program_counter += 1
 
-def halt(cpu : CPU, operands : list[str]):
+def halt(cpu : CPU, operands : list[str]) -> None:
     cpu.should_halt = True
+
+def add(cpu : CPU, operands : list[str]) -> None:
+    result = cpu.registers[operands[1]] + cpu.registers[operands[2]]
+    cpu.write_register(operands[0], result)
+    cpu.program_counter += 1
+
+def sub(cpu : CPU, operands : list[str]) -> None:
+    result = cpu.registers[operands[1]] - cpu.registers[operands[2]]
+    cpu.write_register(operands[0], result)
+    cpu.program_counter += 1
+
+def mul(cpu : CPU, operands : list[str]) -> None:
+    result = cpu.registers[operands[1]] * cpu.registers[operands[2]]
+    cpu.write_register(operands[0], result)
+    cpu.program_counter += 1
+
+def div(cpu : CPU, operands : list[str]) -> None:
+    result = cpu.registers[operands[1]] // cpu.registers[operands[2]]
+    cpu.write_register(operands[0], result)
+    cpu.program_counter += 1
 
 if __name__ == "__main__":
     main()

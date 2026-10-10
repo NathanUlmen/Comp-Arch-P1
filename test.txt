@@ -1,4 +1,8 @@
-LDR 0x00 R6         // Load constant 1 into R6
-LDR 0x01 R7         // Load constant 2 into R7
-LDR 0x02 R8         // Load constant 3 into R8
+LDR 0x00 R6         // Load constant 0 into R6
+LDR 0x01 R7         // Load constant 1 into R7
+LDR 0x02 R8         // Load constant 2 into R8
+ADD R0 R7 R8        // add 1 and 2 stor in R0
+MUL R1 R0 R8        // 3 * 2 and store in r1
+DIV R2 R1 R8        // 6 / 2 and store in r2
+SUB R3 R0 R6        // 3 - 1 and store in r3
 HALT
