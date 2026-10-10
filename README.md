@@ -15,6 +15,8 @@ python3 main.py -r test.txt
 
 ## Progress
 
+### TODO: figure out schema for memory files
+
 ### ALU - 14
 
 * ADD - **DONE**
