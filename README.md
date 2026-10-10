@@ -55,6 +55,6 @@ python3 main.py -r test.txt
 
 ### OTHER - 2
 * NOP 
-* HALT
+* HALT - **DONE**
 
 

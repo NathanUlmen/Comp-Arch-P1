@@ -18,6 +18,7 @@ class CPU:
         self.should_halt = False
         self.program_counter = 0
         self.registers = {f"R{i}" : 0 for i in range(16)}
+        self.registers["PC"] = 0
         self.flags = {
             "negative" : False, 
             "zero" : False,
@@ -50,6 +51,11 @@ class CPU:
     # IDK if we will use this, but we might need it 
     def write_register(self, target : str, value : int):
         self.registers[target] = value & 0xFFFFFF
+
+    def set_program_counter(self, value : int):
+        self.program_counter = value
+        self.registers["PC"] = value
+
 
 def main() -> None:
     args = sys.argv[1:]
@@ -87,48 +93,142 @@ def execute_program(program : list[Instruction]) -> CPU:
     return cpu
 
 def execute_instr(cpu : CPU, instr: Instruction) -> None:
+    # All instructions MUST return a bool that indicates whether or not
+    # the program counter is incremented. Branch instrs will opt out of this
     lookup = {
         "LDR" : ldr,
         "HALT" : halt,
         "ADD" : add,
         "SUB" : sub,
         "MUL" : mul,
-        "DIV" : div 
+        "DIV" : div,
+        "MOV" : mov
     }
-    lookup[instr.opcode](cpu, instr.operands)
+    if lookup[instr.opcode](cpu, instr.operands):
+        cpu.set_program_counter(cpu.program_counter + 1)
 
-def ldr(cpu : CPU, operands : list[str]) -> None:
+# ALU
+def add(cpu : CPU, operands : list[str]) -> bool:
+    result = cpu.registers[operands[1]] + cpu.registers[operands[2]]
+    cpu.write_register(operands[0], result)
+    return True
+
+def sub(cpu : CPU, operands : list[str]) -> bool:
+    result = cpu.registers[operands[1]] - cpu.registers[operands[2]]
+    cpu.write_register(operands[0], result)
+    return True
+
+def mul(cpu : CPU, operands : list[str]) -> bool:
+    result = cpu.registers[operands[1]] * cpu.registers[operands[2]]
+    cpu.write_register(operands[0], result)
+    return True
+
+def div(cpu : CPU, operands : list[str]) -> bool:
+    result = cpu.registers[operands[1]] // cpu.registers[operands[2]]
+    cpu.write_register(operands[0], result)
+    return True
+
+def mov(cpu : CPU, operands : list[str]) -> bool:
+    cpu.write_register(operands[0], cpu.registers[operands[1]])
+    return True
+
+def sdiv(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def udiv(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def and_(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def or_(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def xor(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def bic(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def not_(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def lsl(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def lsr(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def teq(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+# Memory
+def ldr(cpu : CPU, operands : list[str]) -> bool:
     # TODO: this currently functions like ldri
     # Once memory if figured out needs to be udpated to pull value at address instead
     cpu.write_register(operands[1], int(operands[0], 16))
-    cpu.program_counter += 1
+    return True
 
-def halt(cpu : CPU, operands : list[str]) -> None:
+def ldi(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def store(cpu: CPU, operands : list[str]) -> bool:
+    pass
+
+def str_(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def sti(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+# Floating point
+def fadd(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def fsub(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def fmul(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def fdiv(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def fcmp(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+# Control
+def b(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def eq(cpu: CPU, operands : list[str]) -> bool:
+    pass
+
+def blt(cpu: CPU, operands : list[str]) -> bool:
+    pass
+
+def beq(cpu: CPU, operands : list[str]) -> bool:
+    pass
+
+def bne(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def bgt(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def bge(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def ble(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+# Other
+def nop(cpu : CPU, operands : list[str]) -> bool:
+    pass
+
+def halt(cpu : CPU, operands : list[str]) -> bool:
     cpu.should_halt = True
-
-def add(cpu : CPU, operands : list[str]) -> None:
-    result = cpu.registers[operands[1]] + cpu.registers[operands[2]]
-    cpu.write_register(operands[0], result)
-    cpu.program_counter += 1
-
-def sub(cpu : CPU, operands : list[str]) -> None:
-    result = cpu.registers[operands[1]] - cpu.registers[operands[2]]
-    cpu.write_register(operands[0], result)
-    cpu.program_counter += 1
-
-def mul(cpu : CPU, operands : list[str]) -> None:
-    result = cpu.registers[operands[1]] * cpu.registers[operands[2]]
-    cpu.write_register(operands[0], result)
-    cpu.program_counter += 1
-
-def div(cpu : CPU, operands : list[str]) -> None:
-    result = cpu.registers[operands[1]] // cpu.registers[operands[2]]
-    cpu.write_register(operands[0], result)
-    cpu.program_counter += 1
-
-
-
+    return False
 
 if __name__ == "__main__":
     main()
-
