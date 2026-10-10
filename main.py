@@ -86,7 +86,7 @@ def parse_program(program : str) -> list[Instruction]:
 def execute_program(program : list[Instruction]) -> CPU:
     cpu = CPU()
     # All instructions MUST return a bool that indicates whether or not
-    # the program counter is incremented. Branch instrs will opt out of this
+    # the program counter is incremented. Branch instrs will opt out if condition is met
     opcode_lookup = {
         "LDR" : ldr,
         "HALT" : halt,

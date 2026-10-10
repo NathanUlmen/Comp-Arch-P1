@@ -1,8 +1,25 @@
 LDR 0x00 R6         // Load constant 0 into R6
 LDR 0x01 R7         // Load constant 1 into R7
 LDR 0x02 R8         // Load constant 2 into R8
-ADD R0 R7 R8        // add 1 and 2 stor in R0
-MUL R1 R0 R8        // 3 * 2 and store in r1
-DIV R2 R1 R8        // 6 / 2 and store in r2
-SUB R3 R0 R6        // 3 - 1 and store in r3
+ADD R0 R7 R8        // 1 + 2 = 3
+MUL R1 R0 R8        // 3 * 2 = 6
+DIV R2 R1 R8        // 6 / 2 = 3
+SUB R3 R0 R6        // 3 - 0 = 3
+
+MOV R4 R1          // Copy 6 into R4
+LDR 0x0F R9        // Load bit mask 15
+LDR 0x0A R10       // Load bit pattern 10
+AND R5 R9 R10      // 15 & 10 = 10
+OR R11 R1 R10      // 6 | 10 = 14
+XOR R12 R9 R10     // 15 ^ 10 = 5
+BIC R13 R9 R10     // Clear the bits in 10 from 15 should give 5
+NOT R14 R9         // Invert 15 within 24 bits should give 0xFFFFF0
+
+LSL R4 R4 R8       // 6 << 2 = 24
+LSR R15 R4 R7      // 24 >> 1 = 12
+ADD R0 R4 R15      // 24 + 12 = 36
+SUB R3 R0 R5       // 36 - 10 = 26
+MUL R1 R12 R8      // 5 * 2 = 10
+DIV R2 R3 R1       // 26 / 10 = 2
+NOP                
 HALT
