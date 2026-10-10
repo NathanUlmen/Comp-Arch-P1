@@ -17,7 +17,7 @@ class CPU:
     def __init__(self) -> None:
         self.should_halt = False
         self.program_counter = 0
-        self.registers = {f"R{i}" : 0 for i in range(16)}
+        self.registers : dict[str, int] = {f"R{i}" : 0 for i in range(16)}
         self.registers["PC"] = 0
         self.flags = {
             "negative" : False, 
@@ -61,7 +61,7 @@ def main() -> None:
     args = sys.argv[1:]
     run_mode = args[0] # TODO: implement different run modes, does nothing currently
     program_file = args[1]
-    memory_file = "test.mem" # TODO: udpate once we have memory figured out
+    memory_file = "test.mem" # TODO: udpate to "args[2]" once we have memory figured out
 
     file_as_str = None
     with open(program_file) as file:
@@ -85,27 +85,39 @@ def parse_program(program : str) -> list[Instruction]:
 
 def execute_program(program : list[Instruction]) -> CPU:
     cpu = CPU()
-    while not cpu.should_halt:
-        instr = program[cpu.program_counter]
-        execute_instr(cpu, instr)
-
-    print(cpu)
-    return cpu
-
-def execute_instr(cpu : CPU, instr: Instruction) -> None:
     # All instructions MUST return a bool that indicates whether or not
     # the program counter is incremented. Branch instrs will opt out of this
-    lookup = {
+    opcode_lookup = {
         "LDR" : ldr,
         "HALT" : halt,
         "ADD" : add,
         "SUB" : sub,
         "MUL" : mul,
         "DIV" : div,
-        "MOV" : mov
+        "MOV" : mov,
+        "AND" : and_,
+        "OR" : or_,
+        "XOR" : xor,
+        "BIC" : bic,
+        "NOT" : not_,
+        "LSL" : lsl,
+        "LSR" : lsr,
+        "B" : b,
+        "BEQ" : beq,
+        "BNE" : bne,
+        "BGT" : bgt,
+        "BLT" : blt,
+        "BGE" : bge,
+        "BLE" : ble,
+        "NOP" : nop
     }
-    if lookup[instr.opcode](cpu, instr.operands):
-        cpu.set_program_counter(cpu.program_counter + 1)
+    while not cpu.should_halt:
+        instr = program[cpu.program_counter]
+        if opcode_lookup[instr.opcode](cpu, instr.operands):
+            cpu.set_program_counter(cpu.program_counter + 1)
+
+    print(cpu)
+    return cpu
 
 # ALU
 def add(cpu : CPU, operands : list[str]) -> bool:
@@ -139,25 +151,39 @@ def udiv(cpu : CPU, operands : list[str]) -> bool:
     pass
 
 def and_(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    result = cpu.registers[operands[1]] & cpu.registers[operands[2]]
+    cpu.write_register(operands[0], result)
+    return True
 
 def or_(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    result = cpu.registers[operands[1]] | cpu.registers[operands[2]]
+    cpu.write_register(operands[0], result)
+    return True
 
 def xor(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    result = cpu.registers[operands[1]] ^ cpu.registers[operands[2]]
+    cpu.write_register(operands[0], result)
+    return True
 
 def bic(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    result = cpu.registers[operands[1]] & ~cpu.registers[operands[2]]
+    cpu.write_register(operands[0], result)
+    return True
 
 def not_(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    result = ~ cpu.registers[operands[1]] 
+    cpu.write_register(operands[0], result)
+    return True
 
 def lsl(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    result = cpu.registers[operands[1]] << cpu.registers[operands[2]]
+    cpu.write_register(operands[0], result)
+    return True
 
 def lsr(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    result = cpu.registers[operands[1]] >> cpu.registers[operands[2]]
+    cpu.write_register(operands[0], result)
+    return True
 
 def teq(cpu : CPU, operands : list[str]) -> bool:
     pass
@@ -199,32 +225,51 @@ def fcmp(cpu : CPU, operands : list[str]) -> bool:
 
 # Control
 def b(cpu : CPU, operands : list[str]) -> bool:
-    pass
-
-def eq(cpu: CPU, operands : list[str]) -> bool:
-    pass
-
-def blt(cpu: CPU, operands : list[str]) -> bool:
-    pass
+    # TODO: Currently doesnt work with address like 
+    # we specified in our document.
+    cpu.set_program_counter(cpu.registers[operands[0]])
+    return False
 
 def beq(cpu: CPU, operands : list[str]) -> bool:
-    pass
+    if cpu.registers[operands[1]] == cpu.registers[operands[2]]: 
+        cpu.set_program_counter(cpu.registers[operands[0]])
+        return False
+    return True
+
+
+def blt(cpu: CPU, operands : list[str]) -> bool:
+    if cpu.registers[operands[1]] < cpu.registers[operands[2]]: 
+        cpu.set_program_counter(cpu.registers[operands[0]])
+        return False
+    return True
 
 def bne(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    if cpu.registers[operands[1]] != cpu.registers[operands[2]]: 
+        cpu.set_program_counter(cpu.registers[operands[0]])
+        return False
+    return True
 
 def bgt(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    if cpu.registers[operands[1]] > cpu.registers[operands[2]]: 
+        cpu.set_program_counter(cpu.registers[operands[0]])
+        return False
+    return True
 
 def bge(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    if cpu.registers[operands[1]] >= cpu.registers[operands[2]]: 
+        cpu.set_program_counter(cpu.registers[operands[0]])
+        return False
+    return True
 
 def ble(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    if cpu.registers[operands[1]] <= cpu.registers[operands[2]]: 
+        cpu.set_program_counter(cpu.registers[operands[0]])
+        return False
+    return True
 
 # Other
 def nop(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    return True
 
 def halt(cpu : CPU, operands : list[str]) -> bool:
     cpu.should_halt = True
