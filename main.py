@@ -26,13 +26,34 @@ class CPU:
             "saturation" : False
         }
 
+    def __str__(self) -> str:
+        output = [
+            "===== CPU STATE =====",
+            f"Program Counter: {self.program_counter}",
+            f"Halted: {self.should_halt}",
+            "",
+            "----- REGISTERS -----"
+        ]
+
+        for register, value in self.registers.items():
+            output.append(f"{register:>3}: 0x{value:08X} ({value})")
+
+        output.append("")
+        output.append("------ FLAGS ------")
+
+        for flag, value in self.flags.items():
+            output.append(f"{flag.capitalize():<12}: {int(value)}")
+
+        return "\n".join(output)
+
+
     # IDK if we will use this, but we might need it 
     def write_register(self, target : str, value : int):
         self.registers[target] = value & 0xFFFFFF
 
 def main() -> None:
     args = sys.argv[1:]
-    program_file = "MINFINDER.txt"
+    program_file = "test.txt"
     memory_file = "test.mem"
 
     file_as_str = None
@@ -49,7 +70,7 @@ def parse_program(program : str) -> list[Instruction]:
     for line in program.splitlines():
         split_line = line.split("//", 1)[0].split() # strip out comments and then split on whitespace
         if len(split_line) > 0:
-            instr = Instruction(split_line[0], split_line[1:])
+            instr = Instruction(split_line[0].upper(), split_line[1:])
             program_instrs.append(instr)
     
     return program_instrs
@@ -59,14 +80,26 @@ def execute_program(program : list[Instruction]) -> None:
     cpu = CPU()
     while not cpu.should_halt:
         tick(program, cpu)
+    print(cpu)
 
 
 def tick(program : list[Instruction], cpu : CPU):
+    instr = program[cpu.program_counter]
+    execute_instr(cpu, instr)
 
-    pass
+def execute_instr(cpu : CPU, instr: Instruction):
+    lookup = {
+        "LDR" : ldr,
+        "HALT" : halt
+    }
+    lookup[instr.opcode](cpu, instr.operands)
 
-def execute_instr():
-    pass
+def ldr(cpu : CPU, operands : list[str]):
+    cpu.write_register(operands[1], int(operands[0], 16))
+    cpu.program_counter += 1
+
+def halt(cpu : CPU, operands : list[str]):
+    cpu.should_halt = True
 
 if __name__ == "__main__":
     main()

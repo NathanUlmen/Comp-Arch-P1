@@ -1,1 +1,4 @@
-Hello World
+LDR 0x00 R6         // Load constant 1 into R6
+LDR 0x01 R7         // Load constant 2 into R7
+LDR 0x02 R8         // Load constant 3 into R8
+HALT
