@@ -36,7 +36,7 @@ we dont act differently if bits stored at each address are different.
 * MOV - **DONE**
 * LSL - **DONE**
 * LSR - **DONE**
-* TEQ
+* TEQ - **DONE**
 
 ### MEM - 4
 
