@@ -26,8 +26,8 @@ we dont act differently if bits stored at each address are different.
 * ADD - **DONE**
 * SUB - **DONE**
 * MUL - **DONE**
-* SDIV
-* UDIV
+* SDIV - **DONE**
+* UDIV - **DONE**
 * AND - **DONE**
 * OR - **DONE**
 * XOR - **DONE**

@@ -38,7 +38,7 @@ class CPU:
         ]
 
         for register, value in self.registers.items():
-            output.append(f"{register:>3}: 0x{value:08X} ({value})")
+            output.append(f"{register:>3}: 0x{value:06X} ({value}) ({to_signed_int(value)})")
 
         output.append("")
         output.append("------ FLAGS ------")
@@ -119,7 +119,9 @@ def execute_program(program : list[Instruction], memory) -> CPU:
         "ADD" : add,
         "SUB" : sub,
         "MUL" : mul,
-        "DIV" : div,
+        "UDIV" : udiv,
+        "SDIV" : sdiv,
+        "TEQ" : teq,
         "MOV" : mov,
         "AND" : and_,
         "OR" : or_,
@@ -161,20 +163,25 @@ def mul(cpu : CPU, operands : list[str]) -> bool:
     cpu.write_register(operands[0], result)
     return True
 
-def div(cpu : CPU, operands : list[str]) -> bool:
-    result = cpu.registers[operands[1]] // cpu.registers[operands[2]]
-    cpu.write_register(operands[0], result)
-    return True
+# Same as udiv
+# def div(cpu : CPU, operands : list[str]) -> bool:
+#     result = cpu.registers[operands[1]] // cpu.registers[operands[2]]
+#     cpu.write_register(operands[0], result)
+#     return True
 
 def mov(cpu : CPU, operands : list[str]) -> bool:
     cpu.write_register(operands[0], cpu.registers[operands[1]])
     return True
 
 def sdiv(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    result = to_signed_int(cpu.registers[operands[1]]) // to_signed_int(cpu.registers[operands[2]])
+    cpu.write_register(operands[0], result)
+    return True
 
 def udiv(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    result = cpu.registers[operands[1]] // cpu.registers[operands[2]]
+    cpu.write_register(operands[0], result)
+    return True
 
 def and_(cpu : CPU, operands : list[str]) -> bool:
     result = cpu.registers[operands[1]] & cpu.registers[operands[2]]
@@ -212,7 +219,9 @@ def lsr(cpu : CPU, operands : list[str]) -> bool:
     return True
 
 def teq(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    cmp = cpu.registers[operands[0]] ^ cpu.registers[operands[1]]
+    cpu.flags["zero"] = cmp == 0
+    return True
 
 # Memory
 def ldr(cpu : CPU, operands : list[str]) -> bool:
@@ -304,6 +313,11 @@ def halt(cpu : CPU, operands : list[str]) -> bool:
 # Helpers
 def parse_int(num : str) -> int:
     return int(num.strip(), 0)
+
+def to_signed_int(num : int) -> int:
+    if num & 0x800000:
+        return num - 0x1000000
+    return num
 
 if __name__ == "__main__":
     main()
