@@ -1,5 +1,6 @@
 import sys
 import struct
+import math
 
 class Instruction:
 
@@ -138,6 +139,11 @@ def execute_program(program : list[Instruction], memory) -> CPU:
         "BLT" : blt,
         "BGE" : bge,
         "BLE" : ble,
+        "FADD": fadd,
+        "FSUB": fsub,
+        "FMUL": fmul,
+        "FDIV": fdiv,
+        "FCMP": fcmp,
         "NOP" : nop
     }
     while not cpu.should_halt:
@@ -245,19 +251,53 @@ def sti(cpu : CPU, operands : list[str]) -> bool:
 
 # Floating point
 def fadd(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    r1 = fp_to_float(cpu.registers[operands[1]]) # decode
+    r2 = fp_to_float(cpu.registers[operands[2]]) # decode
+    
+    result_fp, overflowed_flag = float_to_fp(r1+r2) #add then encode 
+    cpu.write_register(operands[0], result_fp)
+    cpu.flags["overflow"] = overflowed_flag
+    return True
 
 def fsub(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    r1 = fp_to_float(cpu.registers[operands[1]]) 
+    r2 = fp_to_float(cpu.registers[operands[2]]) 
+    
+    result_fp, overflowed_bits = float_to_fp(r1-r2) 
+    cpu.write_register(operands[0], result_fp)
+    cpu.flags["overflow"] = overflowed_bits
+    return True
 
 def fmul(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    r1 = fp_to_float(cpu.registers[operands[1]]) 
+    r2 = fp_to_float(cpu.registers[operands[2]]) 
+    
+    result_fp, overflowed_bits = float_to_fp(r1*r2) 
+    cpu.write_register(operands[0], result_fp)
+    cpu.flags["overflow"] = overflowed_bits
+    return True
 
 def fdiv(cpu : CPU, operands : list[str]) -> bool:
-    pass
+    r1 = fp_to_float(cpu.registers[operands[1]])
+    r2 = fp_to_float(cpu.registers[operands[2]])
+    if r2 == 0:
+        if r1 == 0 or math.isnan(r1):
+            result = math.nan # 0/0 = NaN
+        else:
+            result = math.copysign(math.inf, r1) * math.copysign(1.0, r2)   # x/0 = +/-inf
+    else:
+        result = r1 / r2
+    result_fp, overflowed = float_to_fp(result)
+    cpu.write_register(operands[0], result_fp)
+    cpu.flags["overflow"] = overflowed
+    return True
 
-def fcmp(cpu : CPU, operands : list[str]) -> bool:
-    pass
+def fcmp(cpu, operands):
+    a = fp_to_float(cpu.registers[operands[0]])
+    b = fp_to_float(cpu.registers[operands[1]])
+    cpu.flags["zero"] = (a == b)
+    cpu.flags["negative"] = (a < b)
+    return True                        # sets flags only writes no register
 
 # Control
 def b(cpu : CPU, operands : list[str]) -> bool:

@@ -1,0 +1,24 @@
+// FP24 test program. Use with fp_mem.txt
+// Inputs loaded from memory:
+//   R1 = 6.5   (0x40D000)    R5 = -2.0  (0xC00000)
+//   R2 = 2.25  (0x401000)    R6 = 1.7e38 (0x7F0000, near max)
+//   R3 = 2.0   (0x400000)    R7 = 1.0   (0x3F8000)
+//   R4 = 0.0   (0x000000)
+LDR 0x00 R1
+LDR 0x01 R2
+LDR 0x02 R3
+LDR 0x03 R4
+LDR 0x04 R5
+LDR 0x05 R6
+LDR 0x06 R7
+ 
+FADD R8 R1 R2       // 6.5 + 2.25  = 8.75    -> R8  = 0x410C00
+FSUB R9 R1 R2       // 6.5 - 2.25  = 4.25    -> R9  = 0x408800
+FMUL R10 R1 R2      // 6.5 * 2.25  = 14.625  -> R10 = 0x416A00
+FDIV R11 R1 R3      // 6.5 / 2.0   = 3.25    -> R11 = 0x405000
+FADD R12 R5 R7      // -2.0 + 1.0  = -1.0    -> R12 = 0xBF8000 (sign bit)
+FDIV R13 R1 R4      // 6.5 / 0     = +inf    -> R13 = 0x7F8000 (no crash)
+FDIV R14 R4 R4      // 0 / 0       = NaN     -> R14 = 0x7FC000
+FADD R15 R6 R6      // too big for FP24: +inf -> R15 = 0x7F8000, Overflow = 1
+FCMP R2 R1          // 2.25 < 6.5: Negative = 1, Zero = 0
+HALT
