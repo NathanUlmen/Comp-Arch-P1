@@ -1,4 +1,5 @@
 import sys
+import struct
 
 class Instruction:
 
@@ -318,6 +319,34 @@ def to_signed_int(num : int) -> int:
     if num & 0x800000:
         return num - 0x1000000
     return num
+
+# floating point helpers
+def fp_to_float(register_value: int) -> float:
+    """
+    ENCODE
+    register_value (24 bit int)- > fp_to_float ->  Python float (do the fp math with returned result)
+    
+    """
+    low24_bits = register_value & 0xFFFFFF          # keep only the low 24 bits
+    shifted_32 = low24_bits << 8                    # move to the top of a 32 bit pattern,  low 8 buts are zeros
+    packed_bytes = struct.pack(">I", shifted_32)    # write the 32 bit int out as 4 bytes
+    result = struct.unpack(">f", packed_bytes)[0]   # read the 4 bytes as a float32 (unpack returns a 1-item tuple)
+    return result
+
+def float_to_fp(x: float) -> tuple[int, bool]:
+    """ returns (24 bit pattern, overflowed)
+    DECODE 
+    x (python float) -> float_to_fp ->  register_value (24 bit int)
+    
+    """
+    try:
+        packed_bytes = struct.pack(">f", x)             # round to nearest float32 as 4 bytes
+        raw_32 = struct.unpack(">I", packed_bytes)[0]   # read the 4 bytes as a 32 bit int
+        fp_24 = raw_32 >> 8                             # drop the low 8 bits
+        return fp_24, False                             # over flow flag false 
+    except OverflowError:                               # finite value too big for float32
+        sign = 0x800000 if x < 0 else 0                 # sign bit (bit 23)
+        return sign | 0x7F8000, True                    # +/- infinity overflow flag set
 
 if __name__ == "__main__":
     main()
