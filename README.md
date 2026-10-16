@@ -48,11 +48,11 @@ we dont act differently if bits stored at each address are different.
 
 ### FP - 5
 
-* FADD
-* FSUB
-* FMUL
-* FDIV
-* FCMP
+* FADD **DONE**
+* FSUB **DONE**
+* FMUL **DONE**
+* FDIV **DONE**
+* FCMP **DONE**
 
 ### CONTROL - 7
 
