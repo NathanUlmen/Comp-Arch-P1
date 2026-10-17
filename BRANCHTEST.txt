@@ -1,0 +1,30 @@
+// BRANCHTEST.txt
+
+// Test 1: Branch to a literal address
+LDR 0x00 R0
+LDR 0x01 R5
+B 0x04
+
+// Failure marker (should be skipped)
+LDR 0x05 R1
+
+// Test 2: Branch to a register-held address (R5 = 7)
+B R5
+
+// Failure marker (should be skipped)
+LDR 0x05 R1
+NOP
+
+// Register branch destination: index 7
+LDR 0x04 R4
+
+// Test 3: Conditional branch to a literal address
+BEQ 0x0B R0 R0
+
+// Failure marker (should be skipped)
+LDR 0x05 R1
+HALT
+
+// Successful destination: index 12
+LDR 0x04 R3
+HALT

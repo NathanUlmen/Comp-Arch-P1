@@ -303,43 +303,43 @@ def fcmp(cpu, operands):
 def b(cpu : CPU, operands : list[str]) -> bool:
     # TODO: Currently doesnt work with address like 
     # we specified in our document.
-    cpu.set_program_counter(cpu.registers[operands[0]])
+    cpu.set_program_counter(resolve_branch_target(cpu, operands[0]))
     return False
 
 def beq(cpu: CPU, operands : list[str]) -> bool:
     if cpu.registers[operands[1]] == cpu.registers[operands[2]]: 
-        cpu.set_program_counter(cpu.registers[operands[0]])
+        cpu.set_program_counter(resolve_branch_target(cpu, operands[0]))
         return False
     return True
 
 
 def blt(cpu: CPU, operands : list[str]) -> bool:
     if cpu.registers[operands[1]] < cpu.registers[operands[2]]: 
-        cpu.set_program_counter(cpu.registers[operands[0]])
+        cpu.set_program_counter(resolve_branch_target(cpu, operands[0]))
         return False
     return True
 
 def bne(cpu : CPU, operands : list[str]) -> bool:
     if cpu.registers[operands[1]] != cpu.registers[operands[2]]: 
-        cpu.set_program_counter(cpu.registers[operands[0]])
+        cpu.set_program_counter(resolve_branch_target(cpu, operands[0]))
         return False
     return True
 
 def bgt(cpu : CPU, operands : list[str]) -> bool:
     if cpu.registers[operands[1]] > cpu.registers[operands[2]]: 
-        cpu.set_program_counter(cpu.registers[operands[0]])
+        cpu.set_program_counter(resolve_branch_target(cpu, operands[0]))
         return False
     return True
 
 def bge(cpu : CPU, operands : list[str]) -> bool:
     if cpu.registers[operands[1]] >= cpu.registers[operands[2]]: 
-        cpu.set_program_counter(cpu.registers[operands[0]])
+        cpu.set_program_counter(resolve_branch_target(cpu, operands[0]))
         return False
     return True
 
 def ble(cpu : CPU, operands : list[str]) -> bool:
     if cpu.registers[operands[1]] <= cpu.registers[operands[2]]: 
-        cpu.set_program_counter(cpu.registers[operands[0]])
+        cpu.set_program_counter(resolve_branch_target(cpu, operands[0]))
         return False
     return True
 
@@ -387,6 +387,15 @@ def float_to_fp(x: float) -> tuple[int, bool]:
     except OverflowError:                               # finite value too big for float32
         sign = 0x800000 if x < 0 else 0                 # sign bit (bit 23)
         return sign | 0x7F8000, True                    # +/- infinity overflow flag set
+
+# Control Helper
+def resolve_branch_target(cpu: CPU, operand: str) -> int:
+    operand = operand.strip().upper()
+
+    if operand in cpu.registers:
+        return cpu.registers[operand]
+
+    return parse_int(operand)
 
 if __name__ == "__main__":
     main()
